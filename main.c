@@ -17,10 +17,10 @@ void mem_clear(struct graph* graph_ptr);
 
 int main(void)
 {
-    bool result;
+    unsigned int result;
     struct graph our_graph = get_graph();
     result = get_odd_num(&our_graph);
-    printf("The number of odd degree vortexes is %u.", result);
+    printf("The number of odd degree vortexes is %u.\n", result);
     graph_vis(our_graph);
     mem_clear(&our_graph);
     system("mimeopen graph.png");
@@ -53,6 +53,14 @@ struct graph get_graph()
             scanf(" %3d", (int*)&matrix[i][g]);
         }
     }
+    for (size_t i = 1; i < u_graph.length; ++i) {
+    	for (size_t g = 0; g < i; ++g) {
+    	    if (matrix[i][g] != matrix[g][i]) {
+    	        printf("Invalid graph!\n");
+    	        exit(1);
+    	    }
+    	}
+    }
     u_graph.matrix = matrix;
     return u_graph;
 }
@@ -70,7 +78,8 @@ unsigned int get_odd_num(struct graph* u_graph) {
     odd_num = 0;
     for (size_t i = 0; i < u_graph -> length; i++) {
         bounds_num = get_bounds(u_graph, i);
-        if ((bounds_num % 2) == 0);
+        if ((bounds_num % 2) == 0) {
+        }
         else {
             ++odd_num;
         }
