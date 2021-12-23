@@ -5,12 +5,12 @@
 
 struct graph
 {
-    int length;
-    bool** matrix;
+    size_t length;
+    unsigned int** matrix;
 };
 
 typedef struct Vertex {
-    unsigned int vertex;
+    size_t vertex;
     unsigned int bounds_num;
 } Vertex;
 
@@ -21,25 +21,28 @@ unsigned int get_odd_num(struct graph* u_graph, Vertex* array);
 void graph_vis(struct graph);
 void mem_clear(struct graph* graph_ptr, Vertex* vert_arr);
 void print_vertexes(Vertex* vertexes, size_t vert_num);
-void graph_open();
 int compare(const void* vert1, const void* vert2);
 
 int main(void)
 {
     unsigned int result;
     struct graph our_graph = get_graph();
+
     Vertex* vertexes = (Vertex*)malloc(sizeof(Vertex) * our_graph.length);  // alloc memory for odd vertexes array
+    if (vertexes == NULL) {
+        printf("memalloc error\n");
+        return 1;
+    }
 
     result = get_odd_num(&our_graph, vertexes);
     printf("\nThe number of odd degree vertexes is %u.\n\n", result);
 
-    graph_vis(our_graph);
-
     qsort(vertexes, result, sizeof(Vertex), compare);
     print_vertexes(vertexes, result);
 
+    graph_vis(our_graph);
+
     mem_clear(&our_graph, vertexes);
-    graph_open();
     return 0;
 }
 
@@ -47,14 +50,23 @@ struct graph get_graph()
 {
     int i;
     struct graph u_graph;
-    //struct graph* graph_p = &u_graph;
     printf("Please, write the size of your adjacency matrix: ");   // Get the size of matrix in form of "4"
-    scanf("%d", &u_graph.length);                                  // and assign it to the variables.
-    bool** matrix = (bool**) malloc(u_graph.length * sizeof(bool*));
+    scanf("%zu", &u_graph.length);                                  // and assign it to the variables.
+    unsigned int** matrix = (unsigned int**) malloc(u_graph.length * sizeof(unsigned int*));
+    if (matrix == NULL) {
+        printf("memalloc error\n");
+        exit(1);
+    }
+
     for(i = 0; i < u_graph.length; ++i)                                   // Create a two-dimensional bool array and
     {                                                                     // and allocate memory for it.
-        matrix[i] = (bool*) malloc(u_graph.length * sizeof(bool));
+        matrix[i] = (unsigned int*) malloc(u_graph.length * sizeof(unsigned int));
+        if (matrix[i] == NULL) {
+            printf("memalloc error\n");
+            exit(1);
+        }
     }
+
     printf("   |");
     for (i = 0; i < u_graph.length; ++i)  // output of the column numeration
     {
@@ -66,7 +78,7 @@ struct graph get_graph()
         printf("  %d|", i);
         for(int g = 0; g < u_graph.length; ++g)
         {
-            scanf(" %3d", (int*)&matrix[i][g]);
+            scanf(" %3u", (unsigned int*)&matrix[i][g]);
         }
     }
     for (size_t i = 1; i < u_graph.length; ++i) {
@@ -95,7 +107,6 @@ unsigned int get_odd_num(struct graph* u_graph, Vertex* array) {
     for (size_t i = 0; i < u_graph -> length; i++) {
         bounds_num = get_bounds(u_graph, i);
         if ((bounds_num % 2) == 0) {
-            printf("1\n");
         }
         else {
             array[odd_num].vertex = i;
@@ -110,28 +121,28 @@ void graph_vis(struct graph u_graph)
 {
     FILE* dot = fopen("graph.dot", "w");
     fprintf(dot, "graph test {\n\t");
-    for (int i = 0; i < u_graph.length; ++i)
+    for (size_t i = 0; i < u_graph.length; ++i)
     {
-        for (int g = i; g < u_graph.length; ++g)
+        for (size_t g = i; g < u_graph.length; ++g)
         {
             if (u_graph.matrix[i][g] == 0)
             {
-                fprintf(dot, "%d;\n\t", i);
+                fprintf(dot, "%zu;\n\t", i);
             }
-            for (int k = 0; k < u_graph.matrix[i][g]; ++k)
+            for (size_t k = 0; k < u_graph.matrix[i][g]; ++k)
             {
-                fprintf(dot, "%d -- %d;\n\t", i, g);
+                fprintf(dot, "%zu -- %zu;\n\t", i, g);
             }
         }
     }
     fprintf(dot, "}");
     fclose(dot);
-    system("dot C:\\Users\\duhin\\source\\repos\\senyaloh\\graph.dot -Tbmp -o graph.PNG");
-    system("rundll32  \"%ProgramFiles%\\Windows Photo Viewer\\PhotoViewer.dll\", ImageView_Fullscreen C:\\Users\\duhin\\source\\repos\\senyaloh\\graph.PNG");
+    system("dot F:\\bmstu-hw-4\\bmstu_hw-4\\hw-4\\graph.dot -Tbmp -o graph.PNG");
+    system("rundll32  \"%ProgramFiles%\\Windows Photo Viewer\\PhotoViewer.dll\", ImageView_Fullscreen F:\\bmstu-hw-4\\bmstu_hw-4\\hw-4\\graph.PNG");
 }
 void mem_clear(struct graph* graph_ptr, Vertex* vert_arr)
 {
-    for (int i = 0; i < graph_ptr -> length; ++i)
+    for (int i = 0; i < graph_ptr->length; ++i)
     {
         free(graph_ptr -> matrix[i]);
     }
@@ -142,21 +153,13 @@ void mem_clear(struct graph* graph_ptr, Vertex* vert_arr)
 void print_vertexes(Vertex* vertexes, size_t vert_num) {
     printf("Sorted odd vertexes:\n");
     for (size_t i = 0; i < vert_num; ++i) {
-        printf("%u ", vertexes[i].vertex);
+        printf("%zu ", vertexes[i].vertex);
     }
     printf("\n");
     for (size_t i = 0; i < vert_num; ++i) {
         printf("%u ", vertexes[i].bounds_num);
     }
     printf("\n\n");
-}
-
-void graph_open() {
-    getchar();
-    do {
-        printf("Press enter to open the graph.\n");
-    } while(getchar() != '\n');
-    system("mimeopen graph.png");
 }
 
 int compare(const void* vert1, const void* vert2) {
